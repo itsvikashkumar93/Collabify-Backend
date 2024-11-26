@@ -39,6 +39,7 @@ module.exports.updateTask = async (req, res) => {
     const task = await taskModel.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
     res.json(task);
   } catch (err) {
     res.status(500).json({ message: err.message });
