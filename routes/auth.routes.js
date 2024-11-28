@@ -8,10 +8,11 @@ const {
   googleController,
   googleCallbackController,
 } = require("../controllers/auth.controller");
+const { isLoggedIn } = require("../middlewares/auth.middleware");
 
 router.post("/signup", signupController);
 router.post("/login", loginController);
-router.post("/logout", logoutController);
+router.post("/logout", isLoggedIn, logoutController);
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["email", "profile"] })

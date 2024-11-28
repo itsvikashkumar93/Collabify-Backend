@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const blacklistTokenModel = require("../models/blacklistToken.model");
 module.exports.signupController = async (req, res) => {
   try {
     const { name, username, email, password, phone, bio } = req.body;
@@ -22,7 +23,10 @@ module.exports.signupController = async (req, res) => {
       phone,
       bio,
     });
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
     res.status(201).json({ message: "User created successfully", token });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -55,6 +59,9 @@ module.exports.loginController = async (req, res) => {
 
 module.exports.logoutController = async (req, res) => {
   try {
+    res.clearCookie("token");
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    await blacklistTokenModel.create({ token });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
